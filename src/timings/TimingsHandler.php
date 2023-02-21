@@ -27,6 +27,8 @@ use pocketmine\entity\Living;
 use pocketmine\Server;
 use function count;
 use function hrtime;
+use function implode;
+use function spl_object_id;
 
 class TimingsHandler{
 	private static bool $enabled = false;
@@ -46,7 +48,15 @@ class TimingsHandler{
 
 			$avg = $time / $count;
 
-			$result[] = "    " . $timings->getName() . " Time: $time Count: " . $count . " Avg: $avg Violations: " . $timings->getViolations();
+			$result[] = "    " . implode(" ", [
+				$timings->getName(),
+				"Time: $time",
+				"Count: $count",
+				"Avg: $avg",
+				"Violations: " . $timings->getViolations(),
+				"Id: " . $timings->getTimerId(),
+				"ParentId: " . ($timings->getParentTimerId() ?? "none")
+			]);
 		}
 
 		$result[] = "# Version " . Server::getInstance()->getVersion();
@@ -97,13 +107,20 @@ class TimingsHandler{
 		}
 	}
 
-	private ?TimingsRecord $record = null;
+	private ?TimingsRecord $rootRecord = null;
 	private int $timingDepth = 0;
+
+	/**
+	 * @var TimingsRecord[]
+	 * @phpstan-var array<int, TimingsRecord>
+	 */
+	private array $recordsByParent = [];
 
 	public function __construct(
 		private string $name,
 		private ?TimingsHandler $parent = null
-	){}
+	){
+	}
 
 	public function getName() : string{ return $this->name; }
 
@@ -115,13 +132,24 @@ class TimingsHandler{
 
 	private function internalStartTiming(int $now) : void{
 		if(++$this->timingDepth === 1){
-			if($this->record === null){
-				$this->record = new TimingsRecord($this);
-			}
-			$this->record->startTiming($now);
 			if($this->parent !== null){
 				$this->parent->internalStartTiming($now);
 			}
+
+			$current = TimingsRecord::getCurrentRecord();
+			if($current !== null){
+				$record = $this->recordsByParent[spl_object_id($current)] ?? null;
+				if($record === null){
+					$record = new TimingsRecord($this, $current);
+					$this->recordsByParent[spl_object_id($current)] = $record;
+				}
+			}else{
+				if($this->rootRecord === null){
+					$this->rootRecord = new TimingsRecord($this, null);
+				}
+				$record = $this->rootRecord;
+			}
+			$record->startTiming($now);
 		}
 	}
 
@@ -142,9 +170,12 @@ class TimingsHandler{
 			return;
 		}
 
-		if($this->record !== null){
-			//this might be null if a timings reset occurred while the timer was running
-			$this->record->stopTiming($now);
+		$record = TimingsRecord::getCurrentRecord();
+		if($record !== null){
+			if($record->getTimerId() !== spl_object_id($this)){
+				throw new \LogicException("Timer \"" . $record->getName() . "\" (ID " . $record->getTimerId() . ") should have been stopped before stopping timer \"" . $this->name . "\" (ID " . spl_object_id($this) . ")");
+			}
+			$record->stopTiming($now);
 		}
 		if($this->parent !== null){
 			$this->parent->internalStopTiming($now);
@@ -171,6 +202,7 @@ class TimingsHandler{
 	 * @internal
 	 */
 	public function destroyCycles() : void{
-		$this->record = null;
+		$this->rootRecord = null;
+		$this->recordsByParent = [];
 	}
 }
