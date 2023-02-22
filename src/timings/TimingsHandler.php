@@ -119,8 +119,7 @@ class TimingsHandler{
 	public function __construct(
 		private string $name,
 		private ?TimingsHandler $parent = null
-	){
-	}
+	){}
 
 	public function getName() : string{ return $this->name; }
 
