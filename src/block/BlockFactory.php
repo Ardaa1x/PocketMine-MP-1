@@ -267,7 +267,7 @@ class BlockFactory{
 		$this->registerAllMeta(new Lever(new BID(Ids::LEVER, 0), "Lever", new BreakInfo(0.5)));
 		$this->registerAllMeta(new Loom(new BID(Ids::LOOM, 0), "Loom", new BreakInfo(2.5, ToolType::AXE)));
 		$this->registerAllMeta(new Magma(new BID(Ids::MAGMA, 0), "Magma Block", new BreakInfo(0.5, ToolType::PICKAXE, ToolTier::WOOD()->getHarvestLevel())));
-		$this->registerAllMeta(new Melon(new BID(Ids::MELON_BLOCK, 0), "Melon Block", new BreakInfo(1.0, ToolType::AXE)));
+		$this->registerAllMeta(new Melon(new BID(Ids::MELON_BLOCK, 0), "Karpuz Blok", new BreakInfo(1.0, ToolType::AXE)));
 		$this->registerAllMeta(new MelonStem(new BID(Ids::MELON_STEM, 0, ItemIds::MELON_SEEDS), "Melon Stem", BreakInfo::instant()));
 		$this->registerAllMeta(new MonsterSpawner(new BID(Ids::MOB_SPAWNER, 0, null, TileMonsterSpawner::class), "Monster Spawner", new BreakInfo(5.0, ToolType::PICKAXE, ToolTier::WOOD()->getHarvestLevel())));
 		$this->registerAllMeta(new Mycelium(new BID(Ids::MYCELIUM, 0), "Mycelium", new BreakInfo(0.6, ToolType::SHOVEL)));
@@ -302,7 +302,7 @@ class BlockFactory{
 		$this->registerAllMeta(new Stair(new BID(Ids::PRISMARINE_STAIRS, 0), "Prismarine Stairs", $prismarineBreakInfo));
 
 		$pumpkinBreakInfo = new BreakInfo(1.0, ToolType::AXE);
-		$this->registerAllMeta(new Pumpkin(new BID(Ids::PUMPKIN, 0), "Pumpkin", $pumpkinBreakInfo));
+		$this->registerAllMeta(new Pumpkin(new BID(Ids::PUMPKIN, 0), "Balkabağı", $pumpkinBreakInfo));
 		$this->registerAllMeta(new CarvedPumpkin(new BID(Ids::CARVED_PUMPKIN, 0), "Carved Pumpkin", $pumpkinBreakInfo));
 		$this->registerAllMeta(new LitPumpkin(new BID(Ids::JACK_O_LANTERN, 0), "Jack o'Lantern", $pumpkinBreakInfo));
 
